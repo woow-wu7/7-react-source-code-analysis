@@ -113,7 +113,9 @@ function legacyCreateRootFromDOMContainer(
   if (!forceHydrate) { // 非服务端渲染
     let rootSibling;
     while ((rootSibling = container.lastChild)) {
-      container.removeChild(rootSibling); // 清空 container 的所有子节点
+      container.removeChild(rootSibling);
+      // 清空 container 的所有子节点
+      // - 这样做说明了不要在容器中写入任何子节点，1.这样会被清空 2.可能会涉及到repaint/reflow
     }
   }
 
@@ -176,7 +178,19 @@ function legacyRenderSubtreeIntoContainer(
   // root
   // 1. 声明 root
   // 2. 在container上生声明了_reactRootContainer属性
-  // 3 init时，_reactRootContainer属性不存在，则 root = undefined
+  // 3. init时，_reactRootContainer属性不存在，则 root = undefined
+  // 4. container
+  //    - 1
+  //    - container是调用 reactDOM.render()时传入的第二个参数，即jsx挂载的容器
+  //    - 下面生成fiberRoot的时候，  root = container._reactRootContainer = legacyCreateRootFromDOMContainer()，
+  //    - 即在容器上挂载了 fiberRoot
+  //    - 2
+  //    - react的项目中，可以通过 document.querySelector('#root')._reactRootContainer 来读取 _reactRootContainer
+  //    - 可以看到：( fiberRoot的构造函 ) 数是 ( FiberRootNode(containerInfo, tag, hydrate) )
+  // 5. 先总结一下
+  //    - root 就是 fiberRoot，因为后面会赋值给 fiberRoot 变量
+  //    - fiberRoot 同样挂在了 container DOM节点上
+  //    - fiberRoot对象 就是整个fiber树的 根节点 ( 其实每个DOM节点一定对应着一个fiber对象，所以DOM树和fiber数一一对应 )
 
   let fiberRoot: FiberRoot; // 缓存 old virtual DOM，用于对比
   // fiberRoot
@@ -190,7 +204,7 @@ function legacyRenderSubtreeIntoContainer(
 
   if (!root) {
     // Initial mount
-    // ------------------- 初始化mount阶段，即初次渲染，root不存在
+    // ------------------------------------------------------------ 初始化mount阶段，即初次渲染，root不存在
     // 初次渲染 root 是不存在的，所以生成一个root
     root = container._reactRootContainer = legacyCreateRootFromDOMContainer(
       container,
@@ -214,7 +228,7 @@ function legacyRenderSubtreeIntoContainer(
     // - 函数签名：flushSyncWithoutWarningIfAlreadyRendering(fn) => fn()
 
   } else {
-    // ------------------- 更新阶段
+    // ------------------------------------------------------------ 更新阶段
     fiberRoot = root;
     if (typeof callback === 'function') {
       const originalCallback = callback;

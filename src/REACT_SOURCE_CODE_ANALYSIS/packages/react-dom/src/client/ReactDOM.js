@@ -172,7 +172,7 @@ export {
   // Disabled behind disableLegacyReactDOMAPIs
   findDOMNode,
   hydrate,
-  render,
+  render, // render 入口
   unmountComponentAtNode,
   // exposeConcurrentModeAPIs
   createRoot,

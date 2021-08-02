@@ -239,16 +239,23 @@ function findHostInstanceWithWarning(
 
 // ----------------------------------------------------------------------------------------------------------- createContainer
 // createContainer
-// 1
 // init mount
-// const root = createContainer(container, LegacyRoot, forceHydrate, null, false, false);
+// 1
+// const root = createContainer(
+//   container,
+//   LegacyRoot, // export const LegacyRoot = 0;
+//   forceHydrate,
+//   null, // hydrationCallbacks
+//   false, // isStrictMode
+//   false, // concurrentUpdatesByDefaultOverride,
+// );
 export function createContainer(
-  containerInfo: Container,
-  tag: RootTag, //  RootTag = 0 | 1
-  hydrate: boolean,
-  hydrationCallbacks: null | SuspenseHydrationCallbacks,
-  isStrictMode: boolean,
-  concurrentUpdatesByDefaultOverride: null | boolean,
+  containerInfo: Container, // ------------------------------------- init: container
+  tag: RootTag, // export type RootTag = 0 | 1; // ----------------- init: 0
+  hydrate: boolean, // --------------------------------------------- inti: false
+  hydrationCallbacks: null | SuspenseHydrationCallbacks, // -------- init: null
+  isStrictMode: boolean, // ---------------------------------------- init: false
+  concurrentUpdatesByDefaultOverride: null | boolean, // ----------- init: false
 ): OpaqueRoot {
   return createFiberRoot(
     containerInfo,

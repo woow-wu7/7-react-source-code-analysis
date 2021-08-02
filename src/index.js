@@ -6,6 +6,8 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+console.log(React.version)
+
 ReactDOM.render(
     <div>App</div>,
   document.getElementById('root')

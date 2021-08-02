@@ -108,6 +108,10 @@ if (__DEV__) {
   }
 }
 
+// ----------------------------------------------------------------------------------------------------------- FiberNode
+// [] FiberNode
+// 1
+// 我们这里重点关注 Fiber Effects 相关的属性
 function FiberNode(
   tag: WorkTag,
   pendingProps: mixed,
@@ -115,16 +119,17 @@ function FiberNode(
   mode: TypeOfMode,
 ) {
   // Instance
-  this.tag = tag;
+  this.tag = tag; // 0-24的类型，表示不同的节点类型，比如function class
   this.key = key;
   this.elementType = null;
   this.type = null;
   this.stateNode = null;
 
   // Fiber
-  this.return = null;
-  this.child = null;
-  this.sibling = null;
+  // fiber对象其实是一个 ( 单向链表树 )
+  this.return = null; // 指向父节点
+  this.child = null; // 第一个孩子，注意这里不是children，而是child
+  this.sibling = null; // 兄弟节点
   this.index = 0;
 
   this.ref = null;
@@ -146,6 +151,13 @@ function FiberNode(
   this.childLanes = NoLanes;
 
   this.alternate = null;
+  // alternate
+  // 1
+  // 主要作用
+  // - 相互引用着 currentTree 和 workInProgressTree 两颗树中的节点，便于 ( 共享一些内部属性，减少内存开销，两颗树相同的属性不用重复创建 )
+  // 2
+  // workInProgressTree 和 currentTree
+  // - 当更新结束以后，workInProgress tree 会将 old tree 替换掉，这种做法称之为 double buffering
 
   if (enableProfilerTimer) {
     // Note: The following is done to avoid a v8 performance cliff.
@@ -200,6 +212,35 @@ function FiberNode(
 //    is faster.
 // 5) It should be easy to port this to a C struct and keep a C implementation
 //    compatible.
+
+// ----------------------------------------------------------------------------------------------------------- createFiber
+// createFiber
+// createFiber(HostRoot, null, null, mode);
+// export type WorkTag = 0-24 的数字
+// export const FunctionComponent = 0; // 函数组件0
+// export const ClassComponent = 1;
+// export const IndeterminateComponent = 2; // Before we know whether it is function or class
+// export const HostRoot = 3; // Root of a host tree. Could be nested inside another node.
+// export const HostPortal = 4; // A subtree. Could be an entry point to a different renderer.
+// export const HostComponent = 5;
+// export const HostText = 6;
+// export const Fragment = 7;
+// export const Mode = 8;
+// export const ContextConsumer = 9; // consumer
+// export const ContextProvider = 10; // provider
+// export const ForwardRef = 11;
+// export const Profiler = 12;
+// export const SuspenseComponent = 13;
+// export const MemoComponent = 14;
+// export const SimpleMemoComponent = 15;
+// export const LazyComponent = 16;
+// export const IncompleteClassComponent = 17;
+// export const DehydratedFragment = 18;
+// export const SuspenseListComponent = 19;
+// export const ScopeComponent = 21;
+// export const OffscreenComponent = 22;
+// export const LegacyHiddenComponent = 23;
+// export const CacheComponent = 24;
 const createFiber = function(
   tag: WorkTag,
   pendingProps: mixed,

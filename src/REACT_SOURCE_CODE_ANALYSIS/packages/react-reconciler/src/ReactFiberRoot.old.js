@@ -31,15 +31,15 @@ import {LegacyRoot, ConcurrentRoot} from './ReactRootTags';
 
 
 // ----------------------------------------------------------------------------------------------------------- FiberRootNode
-// FiberRootNode
+// []FiberRootNode
 // 1
 // init mount
 // const root: FiberRoot = (new FiberRootNode(containerInfo, tag, hydrate): any);
 function FiberRootNode(containerInfo, tag, hydrate) {
   this.tag = tag;
-  this.containerInfo = containerInfo;
+  this.containerInfo = containerInfo; // containerInfo 就是reactDOM.render(element, container) 中的 container 容器，一般是 document.getElementById('root')
   this.pendingChildren = null;
-  this.current = null;
+  this.current = null; // fiberRoot.current = rootFiber
   this.pingCache = null;
   this.finishedWork = null;
   this.timeoutHandle = noTimeout;

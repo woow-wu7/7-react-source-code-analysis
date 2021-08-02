@@ -47,7 +47,7 @@ export type WorkTag =
 // - DocumentFragment: 11 ===========> 文档片段节点
 // - DocumentType: 10 ===============> 文档类型节点
 // - Comment： 8 =====================> 注释节点
-export const FunctionComponent = 0;
+export const FunctionComponent = 0; // 函数组件0
 export const ClassComponent = 1;
 export const IndeterminateComponent = 2; // Before we know whether it is function or class
 export const HostRoot = 3; // Root of a host tree. Could be nested inside another node.
@@ -56,8 +56,8 @@ export const HostComponent = 5;
 export const HostText = 6;
 export const Fragment = 7;
 export const Mode = 8;
-export const ContextConsumer = 9;
-export const ContextProvider = 10;
+export const ContextConsumer = 9; // consumer
+export const ContextProvider = 10; // provider
 export const ForwardRef = 11;
 export const Profiler = 12;
 export const SuspenseComponent = 13;
