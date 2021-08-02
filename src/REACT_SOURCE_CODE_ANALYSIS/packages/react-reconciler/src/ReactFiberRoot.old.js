@@ -106,7 +106,7 @@ function FiberRootNode(containerInfo, tag, hydrate) {
 // return createFiberRoot( containerInfo, tag, hydrate, hydrationCallbacks, isStrictMode, concurrentUpdatesByDefaultOverride, );
 export function createFiberRoot(
   containerInfo: any,
-  tag: RootTag, // type RootTag = 0 | 1;
+  tag: RootTag, // type RootTag = 0 | 1; // 0
   hydrate: boolean,
   hydrationCallbacks: null | SuspenseHydrationCallbacks,
   isStrictMode: boolean,
@@ -120,22 +120,25 @@ export function createFiberRoot(
   // Cyclic construction. This cheats the type system right now because
   // stateNode is any.
   // 循环结构。这会立即欺骗类型系统，因为stateNode是any。
-  const uninitializedFiber = createHostRootFiber(
-    tag,
-    isStrictMode,
-    concurrentUpdatesByDefaultOverride,
+  const uninitializedFiber = createHostRootFiber( // =================================== rootFiber
+    tag, // 0
+    isStrictMode, // false
+    concurrentUpdatesByDefaultOverride, 
   );
   root.current = uninitializedFiber;
   uninitializedFiber.stateNode = root;
+  // fiberRoot 和 rootFiber 之间的相互引用
+  // 1. rootFiber.stateNode = fiberRoot
+  // 2. fiberRoot.current = rootFiber
 
-  if (enableCache) {
+  if (enableCache) {  // export const enableCache = __EXPERIMENTAL__;
     const initialCache = new Map();
     root.pooledCache = initialCache;
     const initialState = {
       element: null,
       cache: initialCache,
     };
-    uninitializedFiber.memoizedState = initialState;
+    uninitializedFiber.memoizedState = initialState; // memoizedState 的赋值
   } else {
     const initialState = {
       element: null,
@@ -143,7 +146,7 @@ export function createFiberRoot(
     uninitializedFiber.memoizedState = initialState;
   }
 
-  initializeUpdateQueue(uninitializedFiber);
+  initializeUpdateQueue(uninitializedFiber); // 添加 rootFiber.updateQueue 属性
 
   return root;
 }

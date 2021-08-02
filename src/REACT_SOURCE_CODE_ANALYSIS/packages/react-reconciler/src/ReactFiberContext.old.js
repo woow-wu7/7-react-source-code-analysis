@@ -172,6 +172,8 @@ function pushTopLevelContextObject(
   }
 }
 
+// ----------------------------------------------------------------------------------------------------------- processChildContext
+// 【】 processChildContext
 function processChildContext(
   fiber: Fiber,
   type: any,
@@ -287,6 +289,9 @@ function invalidateContextProvider(
   }
 }
 
+
+// ----------------------------------------------------------------------------------------------------------- findCurrentUnmaskedContext
+// 【】 findCurrentUnmaskedContext
 function findCurrentUnmaskedContext(fiber: Fiber): Object {
   if (disableLegacyContext) {
     return emptyContextObject;
@@ -301,11 +306,11 @@ function findCurrentUnmaskedContext(fiber: Fiber): Object {
 
     let node = fiber;
     do {
-      switch (node.tag) {
+      switch (node.tag) { // tag
         case HostRoot:
           return node.stateNode.context;
-        case ClassComponent: {
-          const Component = node.type;
+        case ClassComponent: { // calss组件
+          const Component = node.type; // type
           if (isContextProvider(Component)) {
             return node.stateNode.__reactInternalMemoizedMergedChildContext;
           }

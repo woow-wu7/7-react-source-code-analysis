@@ -129,17 +129,26 @@ if (__DEV__) {
   didWarnAboutFindNodeInStrictMode = {};
 }
 
+// ----------------------------------------------------------------------------------------------------------- getContextForSubtree
+// 【】 getContextForSubtree
 function getContextForSubtree(
   parentComponent: ?React$Component<any, any>,
 ): Object {
-  if (!parentComponent) {
+  if (!parentComponent) { // 不存在父组件返回空对象
     return emptyContextObject;
+    // export const emptyContextObject = {};
   }
 
   const fiber = getInstance(parentComponent);
+  // getInstance
+  // 就是下面的get方法
+  // export function get(key) {
+  //   return key._reactInternals;
+  // }
+
   const parentContext = findCurrentUnmaskedContext(fiber);
 
-  if (fiber.tag === ClassComponent) {
+  if (fiber.tag === ClassComponent) { // class 类型的组件
     const Component = fiber.type;
     if (isLegacyContextProvider(Component)) {
       return processChildContext(fiber, Component, parentContext);
@@ -258,16 +267,17 @@ export function createContainer(
   concurrentUpdatesByDefaultOverride: null | boolean, // ----------- init: false
 ): OpaqueRoot {
   return createFiberRoot(
-    containerInfo,
-    tag,
-    hydrate,
-    hydrationCallbacks,
-    isStrictMode,
-    concurrentUpdatesByDefaultOverride,
+    containerInfo, //container
+    tag, // 0
+    hydrate, // false
+    hydrationCallbacks, // null
+    isStrictMode, // false
+    concurrentUpdatesByDefaultOverride, // false
   );
 }
 // ----------------------------------------------------------------------------------------------------------- updateContainer
-// updateContainer
+// 【】updateContainer
+// updateContainer(children, fiberRoot, parentComponent, callback);
 export function updateContainer(
   element: ReactNodeList,
   container: OpaqueRoot, // fiberRoot
@@ -277,11 +287,12 @@ export function updateContainer(
   if (__DEV__) {
     onScheduleRoot(container, element);
   }
-  const current = container.current;
+  const current = container.current; // container.current => rootFiber
   const eventTime = requestEventTime();
   const lane = requestUpdateLane(current);
 
   if (enableSchedulingProfiler) {
+    // export const enableSchedulingProfiler = __PROFILE__ && __EXPERIMENTAL__;
     markRenderScheduled(lane);
   }
 
@@ -309,7 +320,7 @@ export function updateContainer(
     }
   }
 
-  const update = createUpdate(eventTime, lane);
+  const update = createUpdate(eventTime, lane); // 返回update对象
   // Caution: React DevTools currently depends on this property
   // being called "element".
   update.payload = {element};

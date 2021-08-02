@@ -25,6 +25,7 @@ export function remove(key) {
 }
 
 // ----------------------------------------------------------------------------------------------------------- get || getInstance
+// get
 export function get(key) {
   return key._reactInternals;
 }

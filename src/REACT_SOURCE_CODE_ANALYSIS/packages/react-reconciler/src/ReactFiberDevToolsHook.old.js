@@ -73,14 +73,19 @@ export function injectInternals(internals: Object): boolean {
   return true;
 }
 
+// ----------------------------------------------------------------------------------------------------------- onScheduleRoot
+//【】onScheduleRoot
+// mount => onScheduleRoot(container, element);
 export function onScheduleRoot(root: FiberRoot, children: ReactNodeList) {
   if (__DEV__) {
     if (
       injectedHook &&
       typeof injectedHook.onScheduleFiberRoot === 'function'
+      // let injectedHook = null;
     ) {
       try {
         injectedHook.onScheduleFiberRoot(rendererID, root, children);
+        // let rendererID = null;
       } catch (err) {
         if (__DEV__ && !hasLoggedError) {
           hasLoggedError = true;

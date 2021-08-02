@@ -205,13 +205,13 @@ function legacyRenderSubtreeIntoContainer(
   if (!root) {
     // Initial mount
     // ------------------------------------------------------------ 初始化mount阶段，即初次渲染，root不存在
-    // 初次渲染 root 是不存在的，所以生成一个root
+    // 初次渲染 root 是不存在的，所以要创建生成一个root
     root = container._reactRootContainer = legacyCreateRootFromDOMContainer(
       container,
       forceHydrate, // init => false
     );
     fiberRoot = root; // 缓存 old virtual DOM，用于对比
-    if (typeof callback === 'function') {
+    if (typeof callback === 'function') { // 一般都不会指定callback，即一般不会进入if
       const originalCallback = callback;
       callback = function() {
         const instance = getPublicRootInstance(fiberRoot);

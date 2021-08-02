@@ -198,6 +198,7 @@ export function cloneUpdateQueue<State>(
 }
 
 // ----------------------------------------------------------------------------------------------------------- createUpdate
+// 【】 createUpdate
 export function createUpdate(eventTime: number, lane: Lane): Update<*> {
   const update: Update<*> = {
     eventTime,
@@ -213,6 +214,7 @@ export function createUpdate(eventTime: number, lane: Lane): Update<*> {
 }
 
 // ----------------------------------------------------------------------------------------------------------- enqueueUpdate
+// 【】 enqueueUpdate
 export function enqueueUpdate<State>(
   fiber: Fiber,
   update: Update<State>,
@@ -221,6 +223,7 @@ export function enqueueUpdate<State>(
   const updateQueue = fiber.updateQueue;
   if (updateQueue === null) {
     // Only occurs if the fiber has been unmounted.
+    // 仅当 fiber unmount 时发生
     return;
   }
 

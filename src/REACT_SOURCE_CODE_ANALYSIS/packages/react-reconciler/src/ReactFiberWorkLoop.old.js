@@ -262,6 +262,7 @@ const RootSuspendedWithDelay = 4;
 const RootCompleted = 5;
 
 // Describes where we are in the React execution stack
+// 描述我们在React执行堆栈中的位置
 let executionContext: ExecutionContext = NoContext;
 // The root we're working on
 let workInProgressRoot: FiberRoot | null = null;
@@ -353,17 +354,35 @@ export function getWorkInProgressRoot(): FiberRoot | null {
   return workInProgressRoot;
 }
 
+// ----------------------------------------------------------------------------------------------------------- requestEventTime
+// 【】requestEventTime
 export function requestEventTime() {
   if ((executionContext & (RenderContext | CommitContext)) !== NoContext) {
     // We're inside React, so it's fine to read the actual time.
+    // 1
+    // executionContext
+    // let executionContext: ExecutionContext = NoContext; // Describes where we are in the React execution stack // 描述我们在React执行堆栈中的位置
+    // export const NoContext = 0b0000;
+    // 2
+    // const RenderContext = 0b0010;
+    // 3
+    // const CommitContext = 0b0100;
+
+
     return now();
+    // now
+    // export const now = Scheduler.unstable_now;
   }
+
   // We're not inside React, so we may be in the middle of a browser event.
+  // 我们没有内部，所以我们可能处于浏览器事件的中间
   if (currentEventTime !== NoTimestamp) {
     // Use the same start time for all updates until we enter React again.
     return currentEventTime;
   }
+
   // This is the first update since React yielded. Compute a new start time.
+  // React第一次更新。计算新的开始时间
   currentEventTime = now();
   return currentEventTime;
 }
@@ -373,6 +392,7 @@ export function getCurrentTime() {
 }
 
 // ----------------------------------------------------------------------------------------------------------- requestUpdateLane
+//【】 requestUpdateLane
 export function requestUpdateLane(fiber: Fiber): Lane {
   // Special cases
   const mode = fiber.mode;

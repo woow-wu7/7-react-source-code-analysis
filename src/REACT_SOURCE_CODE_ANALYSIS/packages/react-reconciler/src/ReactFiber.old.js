@@ -134,15 +134,16 @@ function FiberNode(
 
   this.ref = null;
 
-  this.pendingProps = pendingProps;
-  this.memoizedProps = null;
-  this.updateQueue = null;
-  this.memoizedState = null;
+  this.pendingProps = pendingProps;  // 在开始执行时设置的 props 的值
+  this.memoizedProps = null; //  在结束时设置的 props 值
+  this.updateQueue = null; // 更新队列，在updateQueue中有使用到
+  this.memoizedState = null; // 当前 state
   this.dependencies = null;
 
   this.mode = mode;
 
   // Effects
+  // effect相关
   this.flags = NoFlags;
   this.subtreeFlags = NoFlags;
   this.deletions = null;
@@ -459,13 +460,15 @@ export function resetWorkInProgress(workInProgress: Fiber, renderLanes: Lanes) {
   return workInProgress;
 }
 
+// ----------------------------------------------------------------------------------------------------------- createHostRootFiber
+// createHostRootFiber
 export function createHostRootFiber(
-  tag: RootTag,
-  isStrictMode: boolean,
+  tag: RootTag, // 0
+  isStrictMode: boolean, // false
   concurrentUpdatesByDefaultOverride: null | boolean,
 ): Fiber {
   let mode;
-  if (tag === ConcurrentRoot) {
+  if (tag === ConcurrentRoot) { // init时：tag === 0，ConcurrentRoot === 1，不进入 if
     mode = ConcurrentMode;
     if (isStrictMode === true) {
       mode |= StrictLegacyMode;
@@ -487,6 +490,7 @@ export function createHostRootFiber(
     }
   } else {
     mode = NoMode;
+    // export const NoMode = 0b000000;
   }
 
   if (enableProfilerTimer && isDevToolsPresent) {
@@ -497,6 +501,7 @@ export function createHostRootFiber(
   }
 
   return createFiber(HostRoot, null, null, mode);
+   // export const HostRoot = 3;
 }
 
 export function createFiberFromTypeAndProps(
