@@ -181,7 +181,7 @@ function legacyRenderSubtreeIntoContainer(
   // 3. init时，_reactRootContainer属性不存在，则 root = undefined
   // 4. container
   //    - 1
-  //    - container是调用 reactDOM.render()时传入的第二个参数，即jsx挂载的容器
+  //    - container是调用 reactDOM.render()时传入的第二个参数，即jsx挂载的容器，是真实的DOM
   //    - 下面生成fiberRoot的时候，  root = container._reactRootContainer = legacyCreateRootFromDOMContainer()，
   //    - 即在容器上挂载了 fiberRoot
   //    - 2
@@ -206,6 +206,21 @@ function legacyRenderSubtreeIntoContainer(
     // Initial mount
     // ------------------------------------------------------------ 初始化mount阶段，即初次渲染，root不存在
     // 初次渲染 root 是不存在的，所以要创建生成一个root
+
+    // 1
+    // container
+    // container._reactRootContainer.
+    // container._reactRootContainer._internalRoot 指向的就是 fiberRoot
+    // 2
+    // fiberRoot === fiberRootNode对象
+    // 3
+    // 再次复习 fiberRoot 和 rootFiber
+    // - fiberRoot
+    //   - fiberRoot 关联的是真实的DOM容器节点
+    // - rootFiber
+    //   - 是虚拟DOM的根节点
+    // - fiberRoot.current === rootFiber
+    // - rootFiber.stateNode === fiberRoot
     root = container._reactRootContainer = legacyCreateRootFromDOMContainer(
       container,
       forceHydrate, // init => false

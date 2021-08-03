@@ -278,6 +278,12 @@ export function createContainer(
 // ----------------------------------------------------------------------------------------------------------- updateContainer
 // 【】updateContainer
 // updateContainer(children, fiberRoot, parentComponent, callback);
+
+// 1
+// updateContainer主要做的事情
+// 1. 获取当前 fiber 节点的 lane 优先级
+// 2. 结合lane优先级，创建当前fiber节点的update对象，并将其入队
+// 3. 调度当前节点 rootFiber
 export function updateContainer(
   element: ReactNodeList,
   container: OpaqueRoot, // fiberRoot
@@ -288,8 +294,8 @@ export function updateContainer(
     onScheduleRoot(container, element);
   }
   const current = container.current; // container.current => rootFiber
-  const eventTime = requestEventTime();
-  const lane = requestUpdateLane(current);
+  const eventTime = requestEventTime(); // 541304.0999999642
+  const lane = requestUpdateLane(current); // 1 表示优先级
 
   if (enableSchedulingProfiler) {
     // export const enableSchedulingProfiler = __PROFILE__ && __EXPERIMENTAL__;
@@ -297,7 +303,7 @@ export function updateContainer(
   }
 
   const context = getContextForSubtree(parentComponent);
-  if (container.context === null) {
+  if (container.context === null) { // mount => 容器上的context是空
     container.context = context;
   } else {
     container.pendingContext = context;
@@ -320,9 +326,10 @@ export function updateContainer(
     }
   }
 
-  const update = createUpdate(eventTime, lane); // 返回update对象
+  const update = createUpdate(eventTime, lane); // 返回update对象，tag=0, lane=1
   // Caution: React DevTools currently depends on this property
   // being called "element".
+  // 警告：React DevTools当前依赖于名为“element”的此属性。
   update.payload = {element};
 
   callback = callback === undefined ? null : callback;
@@ -339,13 +346,15 @@ export function updateContainer(
     update.callback = callback;
   }
 
-  enqueueUpdate(current, update, lane);
-  const root = scheduleUpdateOnFiber(current, lane, eventTime);
+  enqueueUpdate(current, update, lane); // 将update对象入队
+
+  const root = scheduleUpdateOnFiber(current, lane, eventTime); // 调度 fiberRoot
+
   if (root !== null) {
     entangleTransitions(root, current, lane);
   }
 
-  return lane;
+  return lane; // 返回 ( 当前节点 即fiberRoot ) 的优先级
 }
 
 export {

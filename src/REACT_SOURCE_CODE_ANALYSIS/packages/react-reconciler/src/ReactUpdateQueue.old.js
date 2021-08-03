@@ -204,7 +204,7 @@ export function createUpdate(eventTime: number, lane: Lane): Update<*> {
     eventTime,
     lane,
 
-    tag: UpdateState,
+    tag: UpdateState, // export const UpdateState = 0;
     payload: null,
     callback: null,
 
@@ -215,8 +215,9 @@ export function createUpdate(eventTime: number, lane: Lane): Update<*> {
 
 // ----------------------------------------------------------------------------------------------------------- enqueueUpdate
 // 【】 enqueueUpdate
+//  mount => enqueueUpdate(current, update, lane); /
 export function enqueueUpdate<State>(
-  fiber: Fiber,
+  fiber: Fiber, // rootFiber
   update: Update<State>,
   lane: Lane,
 ) {
@@ -242,10 +243,11 @@ export function enqueueUpdate<State>(
       interleaved.next = update;
     }
     sharedQueue.interleaved = update;
-  } else {
-    const pending = sharedQueue.pending;
+  } else { // mount => 直接走到else
+    const pending = sharedQueue.pending; // null
     if (pending === null) {
       // This is the first update. Create a circular list.
+      // 第一次更新，环
       update.next = update;
     } else {
       update.next = pending.next;

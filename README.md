@@ -24,3 +24,9 @@
 
 
 
+# 资料
+- react调试源码教程1 https://juejin.cn/post/6942687170800910350
+- react调试源码教程2 https://zhuanlan.zhihu.com/p/336933386
+
+
+
