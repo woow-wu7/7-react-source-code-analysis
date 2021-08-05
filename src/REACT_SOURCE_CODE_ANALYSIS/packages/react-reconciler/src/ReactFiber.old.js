@@ -119,7 +119,7 @@ function FiberNode(
   mode: TypeOfMode,
 ) {
   // Instance
-  this.tag = tag; // 0-24的类型，表示不同的节点类型，比如function class
+  this.tag = tag; // 0-24的类型，表示不同的fiber类型，比如function class，具体见 WorkTag
   this.key = key;
   this.elementType = null;
   this.type = null;
@@ -148,7 +148,7 @@ function FiberNode(
   this.subtreeFlags = NoFlags;
   this.deletions = null;
 
-  this.lanes = NoLanes;
+  this.lanes = NoLanes; // lanes用来表示优先级，lane赛道的意思
   this.childLanes = NoLanes;
 
   this.alternate = null;

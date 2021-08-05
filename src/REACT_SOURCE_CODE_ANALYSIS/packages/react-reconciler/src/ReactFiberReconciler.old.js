@@ -284,6 +284,9 @@ export function createContainer(
 // 1. 获取当前 fiber 节点的 lane 优先级
 // 2. 结合lane优先级，创建当前fiber节点的update对象，并将其入队
 // 3. 调度当前节点 rootFiber
+
+// 2
+// 调用栈：render > legacyRenderSubtreeIntoContainer > updateContainer
 export function updateContainer(
   element: ReactNodeList,
   container: OpaqueRoot, // fiberRoot
@@ -296,6 +299,9 @@ export function updateContainer(
   const current = container.current; // container.current => rootFiber
   const eventTime = requestEventTime(); // 541304.0999999642
   const lane = requestUpdateLane(current); // 1 表示优先级
+
+  // performance.now()
+  // - 返回：当前网页自从performance.timing.navigationStart到当前时间之间的毫秒数
 
   if (enableSchedulingProfiler) {
     // export const enableSchedulingProfiler = __PROFILE__ && __EXPERIMENTAL__;
@@ -346,9 +352,9 @@ export function updateContainer(
     update.callback = callback;
   }
 
-  enqueueUpdate(current, update, lane); // 将update对象入队
+  enqueueUpdate(current, update, lane); // 将update对象入队，形成环状链表
 
-  const root = scheduleUpdateOnFiber(current, lane, eventTime); // 调度 fiberRoot
+  const root = scheduleUpdateOnFiber(current, lane, eventTime); // 调度 fiber 节点的挂载
 
   if (root !== null) {
     entangleTransitions(root, current, lane);
@@ -367,10 +373,12 @@ export {
   flushPassiveEffects,
 };
 
+// ----------------------------------------------------------------------------------------------------------- getPublicRootInstance
+// 【】 getPublicRootInstance
 export function getPublicRootInstance(
-  container: OpaqueRoot,
+  container: OpaqueRoot, // mount => container = fiberRoot
 ): React$Component<any, any> | PublicInstance | null {
-  const containerFiber = container.current;
+  const containerFiber = container.current; // mount => fiberRoot.current => rootFiber
   if (!containerFiber.child) {
     return null;
   }

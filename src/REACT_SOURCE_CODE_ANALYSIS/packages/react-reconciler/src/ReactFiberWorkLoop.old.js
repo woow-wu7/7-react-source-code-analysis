@@ -465,7 +465,8 @@ function requestRetryLane(fiber: Fiber) {
 
   return claimNextRetryLane();
 }
-
+// ----------------------------------------------------------------------------------------------------------- scheduleUpdateOnFiber
+// 【】 scheduleUpdateOnFiber
 export function scheduleUpdateOnFiber(
   fiber: Fiber,
   lane: Lane,

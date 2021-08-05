@@ -201,10 +201,15 @@ export function cloneUpdateQueue<State>(
 // 【】 createUpdate
 export function createUpdate(eventTime: number, lane: Lane): Update<*> {
   const update: Update<*> = {
-    eventTime,
-    lane,
+    eventTime, // 任务时间，通过 performance.now() 获取的好毫秒数
+    lane, // 优先级
 
-    tag: UpdateState, // export const UpdateState = 0;
+    tag: UpdateState,
+    // tag
+    // - tag: 0 | 1 | 2 | 3
+    // - tag包括：UpdateState | ReplaceState | ForceUpdate | CaptureUpdate
+    // export const UpdateState = 0;
+
     payload: null,
     callback: null,
 
