@@ -152,11 +152,12 @@ function warnIfStringRefCannotBeAutoConverted(config) {
  * @internal
  */
 // ----------------------------------------------------------------------------- ReactElement
+// ReactElement
 const ReactElement = function(type, key, ref, self, source, owner, props) {
   const element = {
     // This tag allows us to uniquely identify this as a React Element
     // $$typeof 这个标签允许我们唯一地将其标识为React元素
-    $$typeof: REACT_ELEMENT_TYPE, // 表示ReactElement类型
+    $$typeof: REACT_ELEMENT_TYPE, // 表示ReactElement类型，是一个Symbol类型的数据，REACT_ELEMENT_TYPE = Symbol.for('react.element');
     // const symbolFor = Symbol.for;
     // REACT_ELEMENT_TYPE = symbolFor('react.element');
 
@@ -383,6 +384,7 @@ export function jsxDEV(type, config, maybeKey, source, self) {
  * See https://reactjs.org/docs/react-api.html#createelement
  */
 // ----------------------------------------------------------------------------- createElement
+// createElement
 export function createElement(type, config, children) {
   // createElement
   // - 参数
@@ -494,7 +496,12 @@ export function createElement(type, config, children) {
     }
     if (__DEV__) {
       if (Object.freeze) {
-        Object.freeze(childArray); // 开发环境冻结对象
+        Object.freeze(childArray);
+        // 开发环境冻结 childArray 数组
+        // 1. Object.freeze()
+        // 冻结对象
+        // 冻结的意思是：不能添加，删除，修改
+        // 注意区分 Object.seal 和 Object.freeze
       }
     }
     props.children = childArray; // 多个children时，一样赋值给 props.children

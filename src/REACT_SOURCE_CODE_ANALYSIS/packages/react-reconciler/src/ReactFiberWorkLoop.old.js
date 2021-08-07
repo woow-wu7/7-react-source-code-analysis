@@ -355,7 +355,7 @@ export function getWorkInProgressRoot(): FiberRoot | null {
 }
 
 // ----------------------------------------------------------------------------------------------------------- requestEventTime
-// 【】requestEventTime
+// 【2】requestEventTime
 export function requestEventTime() {
   if ((executionContext & (RenderContext | CommitContext)) !== NoContext) {
     // We're inside React, so it's fine to read the actual time.
@@ -375,7 +375,7 @@ export function requestEventTime() {
   }
 
   // We're not inside React, so we may be in the middle of a browser event.
-  // 我们没有内部，所以我们可能处于浏览器事件的中间
+  // 我们没有在react内部，所以我们可能处于浏览器事件的中间
   if (currentEventTime !== NoTimestamp) {
     // Use the same start time for all updates until we enter React again.
     return currentEventTime;
@@ -392,10 +392,17 @@ export function getCurrentTime() {
 }
 
 // ----------------------------------------------------------------------------------------------------------- requestUpdateLane
-//【】 requestUpdateLane
+//【3】 requestUpdateLane
 export function requestUpdateLane(fiber: Fiber): Lane {
   // Special cases
   const mode = fiber.mode;
+  // mode
+  // react的模式
+  // var NoContext = 0; 普通模式，同步渲染
+  // var ConcurrentMode = 1; 并发模式，异步渲染
+  // var StrictMode = 2; 用来检测是否存在废弃API，React16-17开发环境使用
+  // var ProfileMode = 4; 性能测试模式，用来检测哪里存在性能问题，React16-17开发环境使用
+
   if ((mode & ConcurrentMode) === NoMode) {
     return (SyncLane: Lane);
   } else if (

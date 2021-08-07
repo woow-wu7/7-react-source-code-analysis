@@ -85,6 +85,8 @@ export const enableCreateEventHandleAPI = false;
 // the user to see a loading state.
 // Also allows hydration callbacks to fire when a dehydrated boundary gets
 // hydrated or deleted.
+
+// enableSuspenseCallback
 export const enableSuspenseCallback = false;
 
 // Part of the simplification of React.createElement so we can eventually move

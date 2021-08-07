@@ -198,10 +198,10 @@ export function cloneUpdateQueue<State>(
 }
 
 // ----------------------------------------------------------------------------------------------------------- createUpdate
-// 【】 createUpdate
+// 【4】 createUpdate
 export function createUpdate(eventTime: number, lane: Lane): Update<*> {
   const update: Update<*> = {
-    eventTime, // 任务时间，通过 performance.now() 获取的好毫秒数
+    eventTime, // 任务时间，通过 performance.now() 获取的毫秒数
     lane, // 优先级
 
     tag: UpdateState,
@@ -211,9 +211,17 @@ export function createUpdate(eventTime: number, lane: Lane): Update<*> {
     // export const UpdateState = 0;
 
     payload: null,
+    // payload
+    // 更新的回调函数，不同类型组件挂载的数据不同
+    // - 1. classComponent => payload = this.setState 的第一个参数-即新的state的值，第二个参数时值更新后的回调函数
+    // - 2. hostRoot => payload = ReactDOM.render 的第一个参数-即jsx
+
     callback: null,
+    // 对于 ClassComponent => callback 为 this.setState 的第二个传参
+    // 对于 HostRoot => callback 为 ReactDOM.render 的第三个传参
 
     next: null,
+    // 与其他 update 链接，形成链表
   };
   return update;
 }

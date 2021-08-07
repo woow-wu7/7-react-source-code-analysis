@@ -113,9 +113,9 @@ if (__DEV__) {
 // 1
 // 我们这里重点关注 Fiber Effects 相关的属性
 function FiberNode(
-  tag: WorkTag,
-  pendingProps: mixed,
-  key: null | string,
+  tag: WorkTag, // 3
+  pendingProps: mixed, // null
+  key: null | string, // null
   mode: TypeOfMode,
 ) {
   // Instance
@@ -134,13 +134,20 @@ function FiberNode(
 
   this.ref = null;
 
-  this.pendingProps = pendingProps;  // 在开始执行时设置的 props 的值
-  this.memoizedProps = null; //  在结束时设置的 props 值
-  this.updateQueue = null; // 更新队列，在updateQueue中有使用到
+  this.pendingProps = pendingProps;  // 在开始执行时设置的 props 的值，- 新传入的props
+  this.memoizedProps = null; //  在结束时设置的 props 值 - 旧的props
+  this.updateQueue = null; // 更新队列，在updateQueue中有使用到，用户暂存 setState 的值
   this.memoizedState = null; // 当前 state
   this.dependencies = null;
 
   this.mode = mode;
+  // mode
+  // react的模式
+  // var NoContext = 0; 普通模式，同步渲染
+  // var ConcurrentMode = 1; 并发模式，异步渲染
+  // var StrictMode = 2; 用来检测是否存在废弃API，React16-17开发环境使用
+  // var ProfileMode = 4; 性能测试模式，用来检测哪里存在性能问题，React16-17开发环境使用
+
 
   // Effects
   // effect相关
@@ -243,9 +250,9 @@ function FiberNode(
 // export const LegacyHiddenComponent = 23;
 // export const CacheComponent = 24;
 const createFiber = function(
-  tag: WorkTag,
-  pendingProps: mixed,
-  key: null | string,
+  tag: WorkTag, // 3
+  pendingProps: mixed, // null
+  key: null | string, // null
   mode: TypeOfMode,
 ): Fiber {
   // $FlowFixMe: the shapes are exact here but Flow doesn't like constructors
@@ -465,7 +472,7 @@ export function resetWorkInProgress(workInProgress: Fiber, renderLanes: Lanes) {
 export function createHostRootFiber(
   tag: RootTag, // 0
   isStrictMode: boolean, // false
-  concurrentUpdatesByDefaultOverride: null | boolean,
+  concurrentUpdatesByDefaultOverride: null | boolean, // false
 ): Fiber {
   let mode;
   if (tag === ConcurrentRoot) { // init时：tag === 0，ConcurrentRoot === 1，不进入 if

@@ -276,7 +276,7 @@ export function createContainer(
   );
 }
 // ----------------------------------------------------------------------------------------------------------- updateContainer
-// 【】updateContainer
+// 【1】updateContainer
 // updateContainer(children, fiberRoot, parentComponent, callback);
 
 // 1
@@ -296,7 +296,7 @@ export function updateContainer(
   if (__DEV__) {
     onScheduleRoot(container, element);
   }
-  const current = container.current; // container.current => rootFiber
+  const current = container.current; // container.current => rootFiber； 这里rootFiber=3时，说明是 hostRoot
   const eventTime = requestEventTime(); // 541304.0999999642
   const lane = requestUpdateLane(current); // 1 表示优先级
 
@@ -308,9 +308,9 @@ export function updateContainer(
     markRenderScheduled(lane);
   }
 
-  const context = getContextForSubtree(parentComponent);
+  const context = getContextForSubtree(parentComponent); // mount => 返回一个空对象
   if (container.context === null) { // mount => 容器上的context是空
-    container.context = context;
+    container.context = context; // 给 container.context = {}
   } else {
     container.pendingContext = context;
   }

@@ -36,10 +36,21 @@ import {LegacyRoot, ConcurrentRoot} from './ReactRootTags';
 // init mount
 // const root: FiberRoot = (new FiberRootNode(containerInfo, tag, hydrate): any);
 function FiberRootNode(containerInfo, tag, hydrate) {
+
   this.tag = tag;
-  this.containerInfo = containerInfo; // containerInfo 就是reactDOM.render(element, container) 中的 container 容器，一般是 document.getElementById('root')
+  // tag
+  // - tag表示fiberRoot对象节点的类型，fiberRoot的tag只可能是 RootTag = 0｜1
+
+  this.containerInfo = containerInfo;
+  // containerInfo
+  // - containerInfo 就是reactDOM.render(element, container) 中的 container 容器，一般是 document.getElementById('root')
+
   this.pendingChildren = null;
-  this.current = null; // fiberRoot.current = rootFiber
+
+  this.current = null;
+  // current
+  // - fiberRoot.current = rootFiber
+
   this.pingCache = null;
   this.finishedWork = null;
   this.timeoutHandle = noTimeout;
@@ -112,18 +123,22 @@ export function createFiberRoot(
   isStrictMode: boolean,
   concurrentUpdatesByDefaultOverride: null | boolean,
 ): FiberRoot {
-  const root: FiberRoot = (new FiberRootNode(containerInfo, tag, hydrate): any);
+  const root: FiberRoot = (new FiberRootNode(containerInfo, tag, hydrate): any); // ============ fiberRoot
+
   if (enableSuspenseCallback) {
-    root.hydrationCallbacks = hydrationCallbacks;
+    // enableSuspenseCallback
+    // export const enableSuspenseCallback = false;
+    // enableSuspenseCallback 是一个常量 false
+    root.hydrationCallbacks = hydrationCallbacks; // 初始化时 hydrationCallbacks = null
   }
 
   // Cyclic construction. This cheats the type system right now because
   // stateNode is any.
   // 循环结构。这会立即欺骗类型系统，因为stateNode是any。
-  const uninitializedFiber = createHostRootFiber( // =================================== rootFiber
+  const uninitializedFiber = createHostRootFiber( // ============================================ rootFiber
     tag, // 0
     isStrictMode, // false
-    concurrentUpdatesByDefaultOverride, 
+    concurrentUpdatesByDefaultOverride, // false
   );
   root.current = uninitializedFiber;
   uninitializedFiber.stateNode = root;

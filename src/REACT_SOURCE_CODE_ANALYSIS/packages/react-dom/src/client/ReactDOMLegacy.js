@@ -128,11 +128,29 @@ function legacyCreateRootFromDOMContainer(
     false, // isStrictMode
     false, // concurrentUpdatesByDefaultOverride,
   );
-  markContainerAsRoot(root.current, container);
+
+  markContainerAsRoot(root.current, container); // 即 container.[internalContainerInstanceKey] = root.current
+  // markContainerAsRoot
+  // 1
+  // export function markContainerAsRoot(hostRoot: Fiber, node: Container): void {
+  //   node[internalContainerInstanceKey] = hostRoot;
+  // }
+  // 2
+  // const internalContainerInstanceKey = '__reactContainer$' + randomKey;
+  // 一个以__reactContainer$开头的字符串
 
   const rootContainerElement =
-    container.nodeType === COMMENT_NODE ? container.parentNode : container;
-  listenToAllSupportedEvents(rootContainerElement);
+    container.nodeType === COMMENT_NODE ? container.parentNode : container; // 如果container是注释节点，则rootContainerElement是父节点，否则是本身
+  // container.nodeType
+  // - ( container.nodeType ) 其实就HTML中的DOM的 ( Node.Element.nodeType )
+  // - 元素节点 element 1
+  // - 属性节点 attr 2
+  // - 文本节点 text 3
+  // - 注释节点 comment 8
+  // - 文档节点 document 9
+  // - 文档片段节点 documentFragment 11
+
+  listenToAllSupportedEvents(rootContainerElement); // 事件相关
 
   return root;
 }
@@ -151,7 +169,7 @@ function warnOnInvalidCallback(callback: mixed, callerName: string): void {
 }
 
 // ----------------------------------------------------------------------------------------------------------- legacyRenderSubtreeIntoContainer
-// legacyRenderSubtreeIntoContainer
+// 【0】 legacyRenderSubtreeIntoContainer
 // 1
 // 初次渲染 init mount
 // - 1. 初次渲染 - 是没有 (老的虚拟DOM节点的 )
@@ -164,7 +182,7 @@ function warnOnInvalidCallback(callback: mixed, callerName: string): void {
 // - legacyRenderSubtreeIntoContainer( null, element, container, false, callback, );
 function legacyRenderSubtreeIntoContainer(
   parentComponent: ?React$Component<any, any>, // init => null
-  children: ReactNodeList, // render 第一个参数 element
+  children: ReactNodeList, // render 第一个参数 element，这里叫child估计是因为是在container中，所以是container的children
   container: Container, // render 第二个参数 container
   forceHydrate: boolean, // 服务器端渲染标识，初始化是false, init => false
   callback: ?Function, // 初次渲染或者更新后需要执行的回调，可选，基本不会使用
@@ -210,7 +228,7 @@ function legacyRenderSubtreeIntoContainer(
   //    - fiberRoot.current = rootFiber
   //    - 两者循环引用
 
-  if (!root) {
+  if (!root) { // root不存在，就创建，初始化时不存在
     // Initial mount
     // ------------------------------------------------------------ 初始化mount阶段，即初次渲染，root不存在
     // 初次渲染 root 是不存在的，所以要创建生成一个root
@@ -340,7 +358,7 @@ export function hydrate(
 }
 
 // ----------------------------------------------------------------------------------------------------------- ReactDOM.render
-// render
+// 【 起点 】render
 // 1
 // ReactDOM.render(element, container[, callback])
 // - 1. 作用：
@@ -348,7 +366,13 @@ export function hydrate(
 //    - 2. 更新：-- 如果React元素之前已经在 container 里渲染过，这将会对其执行 ( 更新操作 )，并仅仅会在必要时改变DOM以映射最新的React元素
 // - 2. 参数
 //    - element
+//      - element表示的是一个react元素，react组件由element元素组成，element元素本质上是一个javascript对象，可以通过React.createElement生成
+//      - React.createElement(type, config, children) => ReactElement(type, key, ref, self, source, ReactCurrentOwner.current, props) => element
+//      - element对象具有
+//          - 基本属性：type，key，ref，props，_owner,  $$typeof
+//          - DEV环境多了：__store, __self, __source 属性
 //    - container
+//      - 属性，即组件或者element上的属性
 //    - callback: 可选，在 ( 渲染或更新 ) 完成后，执行的回调函数
 // - 3. 返回值
 //    - legacyRenderSubtreeIntoContainer
@@ -409,9 +433,15 @@ export function render(
     }
   }
 
+  // 1
   // legacyRenderSubtreeIntoContainer()
   // render() 函数最终返回值 legacyRenderSubtreeIntoContainer()
   // legacy : 遗产  +  render: 渲染  +  subtree: 子树  +  into: 到 +  container: 容器
+  // 2
+  // react一共有三种模式
+  // legacy
+  // blocking
+  // concurrent 以后react18中将默认开启并发模式
   return legacyRenderSubtreeIntoContainer(
     null, // parentComponent 父组件
     element, // children
@@ -421,6 +451,8 @@ export function render(
   );
 }
 
+
+//---分割线
 export function unstable_renderSubtreeIntoContainer(
   parentComponent: React$Component<any, any>,
   element: React$Element<any>,

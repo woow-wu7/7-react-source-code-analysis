@@ -381,6 +381,9 @@ const listeningMarker =
     .toString(36)
     .slice(2);
 
+
+// ----------------------------------------------------------------------------------------------------------- listenToAllSupportedEvents
+// listenToAllSupportedEvents
 export function listenToAllSupportedEvents(rootContainerElement: EventTarget) {
   if (!(rootContainerElement: any)[listeningMarker]) {
     (rootContainerElement: any)[listeningMarker] = true;
