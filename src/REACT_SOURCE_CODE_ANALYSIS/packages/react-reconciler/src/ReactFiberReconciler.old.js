@@ -296,9 +296,13 @@ export function updateContainer(
   if (__DEV__) {
     onScheduleRoot(container, element);
   }
-  const current = container.current; // container.current => rootFiber； 这里rootFiber=3时，说明是 hostRoot
+  const current = container.current; // container.current = fiberRoot.current = rootFiber； 这里rootFiber=3时，说明是 hostRoot
   const eventTime = requestEventTime(); // 541304.0999999642
-  const lane = requestUpdateLane(current); // 1 表示优先级
+  const lane = requestUpdateLane(current); // 1
+  // lane
+  // - lane 表示优先级
+  // - lane越小，表示优先级越高
+  // - lane为二进制存储，一共31位，每个位为一个车道
 
   // performance.now()
   // - 返回：当前网页自从performance.timing.navigationStart到当前时间之间的毫秒数
@@ -337,6 +341,10 @@ export function updateContainer(
   // being called "element".
   // 警告：React DevTools当前依赖于名为“element”的此属性。
   update.payload = {element};
+  // update 的 payload 对应的是一个 React 元素
+  // react元素-即reactElement，是一个对象，具有 type key ref props $$typeof _owner + DEV环境的 __self __source __store 等属性
+  // reactElement可以通过组件生成，也可以通过 React.createElement() 生成
+  // props => key ref __self __source 是保留字段
 
   callback = callback === undefined ? null : callback;
   if (callback !== null) {
@@ -353,8 +361,10 @@ export function updateContainer(
   }
 
   enqueueUpdate(current, update, lane); // 将update对象入队，形成环状链表
+  // enqueueUpdate
+  // enqueueUpdate主要用来添加一个共享队列sharedQueue，该队列可以和workInProgress和FiberRoot进行共享队列
 
-  const root = scheduleUpdateOnFiber(current, lane, eventTime); // 调度 fiber 节点的挂载
+  const root = scheduleUpdateOnFiber(current, lane, eventTime); // 调度 fiberRoot 节点，即 ( 调度更新 )
 
   if (root !== null) {
     entangleTransitions(root, current, lane);

@@ -136,7 +136,7 @@ function FiberNode(
 
   this.pendingProps = pendingProps;  // 在开始执行时设置的 props 的值，- 新传入的props
   this.memoizedProps = null; //  在结束时设置的 props 值 - 旧的props
-  this.updateQueue = null; // 更新队列，在updateQueue中有使用到，用户暂存 setState 的值
+  this.updateQueue = null; // 更新队列，在updateQueue中有使用到，暂存 setState 的值
   this.memoizedState = null; // 当前 state
   this.dependencies = null;
 

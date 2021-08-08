@@ -473,16 +473,22 @@ function requestRetryLane(fiber: Fiber) {
   return claimNextRetryLane();
 }
 // ----------------------------------------------------------------------------------------------------------- scheduleUpdateOnFiber
-// 【】 scheduleUpdateOnFiber
+// 【6】 scheduleUpdateOnFiber
+// const root = scheduleUpdateOnFiber(current, lane, eventTime);
+// 1
+// scheduleUpdateOnFiber 的主作用 ---- 调度 fiber 节点的挂载，即 ( 调度更新 )
+// 2
+// 页面初始化时，此时只是生成了 ( fiberRoot ), 并未生成 ( workInProgressRoot )
 export function scheduleUpdateOnFiber(
-  fiber: Fiber,
+  fiber: Fiber, // rootFiber
   lane: Lane,
   eventTime: number,
 ): FiberRoot | null {
-  checkForNestedUpdates();
+  checkForNestedUpdates(); // 检查是否超出最大容量，可能出现在 (在组件的 componentWillUpdate 或者在 componentDidUpdate 中调用setState )，抛错避免死循环
   warnAboutRenderPhaseUpdatesInDEV(fiber);
 
-  const root = markUpdateLaneFromFiberToRoot(fiber, lane);
+  const root = markUpdateLaneFromFiberToRoot(fiber, lane); //标记root有挂起的更新
+
   if (root === null) {
     warnAboutUpdateOnUnmountedFiberInDEV(fiber);
     return null;
@@ -544,7 +550,8 @@ export function scheduleUpdateOnFiber(
     }
   }
 
-  ensureRootIsScheduled(root, eventTime);
+  ensureRootIsScheduled(root, eventTime); // ensureRootIsScheduled
+
   if (
     lane === SyncLane &&
     executionContext === NoContext &&
@@ -562,6 +569,9 @@ export function scheduleUpdateOnFiber(
   return root;
 }
 
+
+
+
 // This is split into a separate function so we can mark a fiber with pending
 // work without treating it as a typical update that originates from an event;
 // e.g. retrying a Suspense boundary isn't an update, but it does schedule work
@@ -571,11 +581,13 @@ function markUpdateLaneFromFiberToRoot(
   lane: Lane,
 ): FiberRoot | null {
   // Update the source fiber's lanes
-  sourceFiber.lanes = mergeLanes(sourceFiber.lanes, lane);
-  let alternate = sourceFiber.alternate;
+  sourceFiber.lanes = mergeLanes(sourceFiber.lanes, lane); // 合并
+  let alternate = sourceFiber.alternate; // alternate 链接 currentTree 和 workInProgressTree
+
   if (alternate !== null) {
     alternate.lanes = mergeLanes(alternate.lanes, lane);
   }
+
   if (__DEV__) {
     if (
       alternate === null &&
@@ -632,6 +644,8 @@ export function isInterleavedUpdate(fiber: Fiber, lane: Lane) {
 // of the existing task is the same as the priority of the next level that the
 // root has work on. This function is called on every update, and right before
 // exiting a task.
+// ----------------------------------------------------------------------------------------------------------- scheduleUpdateOnFiber
+//【8】ensureRootIsScheduled
 function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
   const existingCallbackNode = root.callbackNode;
 
@@ -699,7 +713,12 @@ function ensureRootIsScheduled(root: FiberRoot, currentTime: number) {
     // Special case: Sync React callbacks are scheduled on a special
     // internal queue
     if (root.tag === LegacyRoot) {
-      scheduleLegacySyncCallback(performSyncWorkOnRoot.bind(null, root));
+
+      scheduleLegacySyncCallback(performSyncWorkOnRoot.bind(null, root)); 
+      // performSyncWorkOnRoot
+      // performSyncWorkOnRoot - 会刷新Effects和同步渲染Fiber
+      // performSyncWorkOnRoot 开启的正是我们反复强调的 render 阶段
+
     } else {
       scheduleSyncCallback(performSyncWorkOnRoot.bind(null, root));
     }
@@ -975,10 +994,19 @@ function markRootSuspended(root, suspendedLanes) {
   markRootSuspended_dontCallThisOneDirectly(root, suspendedLanes);
 }
 
+// ----------------------------------------------------------------------------------------------------------- performSyncWorkOnRoot
+// 【7】 performSyncWorkOnRoot
 // This is the entry point for synchronous tasks that don't go
 // through Scheduler
-function performSyncWorkOnRoot(root) {
+// 1
+// performSyncWorkOnRoot主要作用
+// - 1. 生成 workInProgress fiber节点
+// - 2. 启动 workLoopSync 循环，深度遍历此 fiber 所有后代子节点，并收集 effect 更新；
+// - 3. 最后调用 commitRoot 提交更新
+function performSyncWorkOnRoot(root) { // root 是 fiberRoot
+  // 刷新Effects和同步渲染Fiber
   if (enableProfilerTimer && enableProfilerNestedUpdatePhase) {
+    // export const enableProfilerTimer = __PROFILE__;
     syncNestedUpdateFlag();
   }
 
@@ -989,14 +1017,14 @@ function performSyncWorkOnRoot(root) {
 
   flushPassiveEffects();
 
-  let lanes = getNextLanes(root, NoLanes);
+  let lanes = getNextLanes(root, NoLanes); // 返回一个number类型的数据
   if (!includesSomeLane(lanes, SyncLane)) {
     // There's no remaining sync work left.
     ensureRootIsScheduled(root, now());
     return null;
   }
 
-  let exitStatus = renderRootSync(root, lanes);
+  let exitStatus = renderRootSync(root, lanes); // 同步渲染root
   if (root.tag !== LegacyRoot && exitStatus === RootErrored) {
     executionContext |= RetryAfterError;
 
@@ -1365,6 +1393,9 @@ export function renderHasNotSuspendedYet(): boolean {
   return workInProgressRootExitStatus === RootIncomplete;
 }
 
+// ----------------------------------------------------------------------------------------------------------- renderRootSync
+// 【8】renderRootSync
+// renderRootSync函数，首先会创建一个workInProgress的双向链表树，此树通过alternate和fiberRoot进行关联
 function renderRootSync(root: FiberRoot, lanes: Lanes) {
   const prevExecutionContext = executionContext;
   executionContext |= RenderContext;
@@ -1404,7 +1435,7 @@ function renderRootSync(root: FiberRoot, lanes: Lanes) {
 
   do {
     try {
-      workLoopSync();
+      workLoopSync(); // workLoopSync函数，开始处理workInProgress双向链表，进入beginWork阶段
       break;
     } catch (thrownValue) {
       handleError(root, thrownValue);
@@ -1441,6 +1472,8 @@ function renderRootSync(root: FiberRoot, lanes: Lanes) {
   return workInProgressRootExitStatus;
 }
 
+// 
+// workLoopSync
 // The work loop is an extremely hot path. Tell Closure not to inline it.
 /** @noinline */
 function workLoopSync() {
@@ -1985,6 +2018,8 @@ function commitRootImpl(root, renderPriorityLevel) {
   return null;
 }
 
+// ----------------------------------------------------------------------------------------------------------- flushPassiveEffects
+// flushPassiveEffects
 export function flushPassiveEffects(): boolean {
   // Returns whether passive effects were flushed.
   // TODO: Combine this check with the one in flushPassiveEFfectsImpl. We should
@@ -2353,6 +2388,8 @@ function jnd(timeElapsed: number) {
 
 function checkForNestedUpdates() {
   if (nestedUpdateCount > NESTED_UPDATE_LIMIT) {
+    // let nestedUpdateCount: number = 0;
+    // const NESTED_UPDATE_LIMIT = 50;
     nestedUpdateCount = 0;
     rootWithNestedUpdates = null;
     invariant(
@@ -2361,6 +2398,7 @@ function checkForNestedUpdates() {
         'repeatedly calls setState inside componentWillUpdate or ' +
         'componentDidUpdate. React limits the number of nested updates to ' +
         'prevent infinite loops.',
+      // 超出最大容量，可能出现在 (在组件的 componentWillUpdate 或者在 componentDidUpdate 中调用setState )，抛错避免死循环
     );
   }
 

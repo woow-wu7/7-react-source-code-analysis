@@ -213,7 +213,7 @@ export function createUpdate(eventTime: number, lane: Lane): Update<*> {
     payload: null,
     // payload
     // 更新的回调函数，不同类型组件挂载的数据不同
-    // - 1. classComponent => payload = this.setState 的第一个参数-即新的state的值，第二个参数时值更新后的回调函数
+    // - 1. classComponent => payload = this.setState 的第一个参数-即新的state的值，第二个参数是值更新后的回调函数
     // - 2. hostRoot => payload = ReactDOM.render 的第一个参数-即jsx
 
     callback: null,
@@ -227,7 +227,7 @@ export function createUpdate(eventTime: number, lane: Lane): Update<*> {
 }
 
 // ----------------------------------------------------------------------------------------------------------- enqueueUpdate
-// 【】 enqueueUpdate
+// 【5】 enqueueUpdate
 //  mount => enqueueUpdate(current, update, lane); /
 export function enqueueUpdate<State>(
   fiber: Fiber, // rootFiber
@@ -242,6 +242,7 @@ export function enqueueUpdate<State>(
   }
 
   const sharedQueue: SharedQueue<State> = (updateQueue: any).shared;
+  // 当前队列和缓存队列共享一个持久化队列
 
   if (isInterleavedUpdate(fiber, lane)) {
     const interleaved = sharedQueue.interleaved;
@@ -263,6 +264,7 @@ export function enqueueUpdate<State>(
       // 第一次更新，环
       update.next = update;
     } else {
+      // 否则是 双向链表
       update.next = pending.next;
       pending.next = update;
     }

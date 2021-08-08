@@ -377,6 +377,14 @@ export function hydrate(
 // - 3. 返回值
 //    - legacyRenderSubtreeIntoContainer
 //    - legacyRenderSubtreeIntoContainer( null, element, container, false, callback ) 调用的返回值就是render()函数的返回值
+
+// - 4. render 函数分为三个阶段 【 重点 】
+//    - (1)init 初始化阶段
+//      - 主要完成 Fiber 树中基本实体的创建，比如 fiberRoot rootFiber
+//    - (2) render 阶段
+//      - 标志函数：scheduleUpdateOnFiber()
+//    - (3) commit 阶段
+//      - 标志函数：commitRoot()
 export function render(
   element: React$Element<any>,
   container: Container,

@@ -54,8 +54,14 @@ function FiberRootNode(containerInfo, tag, hydrate) {
   this.pingCache = null;
   this.finishedWork = null;
   this.timeoutHandle = noTimeout;
+
   this.context = null;
   this.pendingContext = null;
+  // context 和 pendingContext
+  // - 在 updateContainer() 方法中会判断 fiberRoot的context是否存在
+  // - 存在： container.context = context = {}
+  // - 不存在：container.pendingContext = context = {}
+
   this.hydrate = hydrate;
   this.callbackNode = null;
   this.callbackPriority = NoLane;

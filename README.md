@@ -27,6 +27,7 @@
 # 资料
 - react调试源码教程1 https://juejin.cn/post/6942687170800910350
 - react调试源码教程2 https://zhuanlan.zhihu.com/p/336933386
-
+- reactDOM.render整体流程 https://cloud.tencent.com/developer/article/1843869
+- performSyncWorkOnRoot函数源码 https://juejin.cn/post/6844904080695885838#heading-19
 
 
