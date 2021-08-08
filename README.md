@@ -8,10 +8,10 @@
 
 
 ### (三) PureComponent 和 Component 和 shouldComponentUpdate 和 React.memo
+- [PureComponent - 源码分掘金文章](https://juejin.cn/post/6993980489463758855/#heading-10)
 
 
 ### (四) ReactDOM.render - 源码分析仓库地址
-- [reactDOM.render - 源码分析仓库地址](https://github.com/woow-wu7/7-react-source-code-analysis)
 - [reactDOM.render - 源码分掘金文章](https://juejin.cn/post/6993980489463758855)
 - [reactDOM.render - 思维导图](https://github.com/woow-wu7/7-react-source-code-analysis/tree/main/src/images/ReactDOM.render.png)
 
