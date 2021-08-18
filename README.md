@@ -16,7 +16,7 @@
 - [reactDOM.render - 思维导图](https://github.com/woow-wu7/7-react-source-code-analysis/tree/main/src/images/ReactDOM.render.png)
 
 #### (五) js实现单向链表
-- [js实现单向链表](https://github.com/woow-wu7/7-react-source-code-analysis/blob/main/src/manual/linked-list.ts)
+- [js实现单向链表 - 源码](https://github.com/woow-wu7/7-react-source-code-analysis/blob/main/src/manual/linked-list.js)
 
 
 #### React.Children
