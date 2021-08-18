@@ -15,6 +15,9 @@
 - [reactDOM.render - 源码分掘金文章](https://juejin.cn/post/6993980489463758855)
 - [reactDOM.render - 思维导图](https://github.com/woow-wu7/7-react-source-code-analysis/tree/main/src/images/ReactDOM.render.png)
 
+#### (五) js实现单向链表
+- [js实现单向链表](https://github.com/woow-wu7/7-react-source-code-analysis/blob/main/src/manual/linked-list.ts)
+
 
 #### React.Children
 - 文件路径：package/react/src/React.js
@@ -32,5 +35,6 @@
 - react调试源码教程2 https://zhuanlan.zhihu.com/p/336933386
 - reactDOM.render整体流程 https://cloud.tencent.com/developer/article/1843869
 - performSyncWorkOnRoot函数源码 https://juejin.cn/post/6844904080695885838#heading-19
+- js实现单向链表 https://cloud.tencent.com/developer/article/1619425
 
 
