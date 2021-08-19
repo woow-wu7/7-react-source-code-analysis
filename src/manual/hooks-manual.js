@@ -11,51 +11,75 @@
 // (二)
 // hooks中的一些概念
 // 1. 链表
-//    memorizedState => hooks函数本身会保存在链表结构中，比如 useState
-//    queue ==========> 多个useState返回数组中的第二个成员setter函数( 更新执行的函数 )，也会保存在链表中，是一个环状链表，环状链表是特殊的单链表
+//    hook.memoizedState => 单向链表 - (hook对象，fiber对象) => hooks函数本的值身会保存在链表结构中，比如 [count, setCount] = useState(0) 中的 count
+//    hook.queue ==========> 环状链表 - (update对象) =========> 多个useState返回数组中的第二个成员setter函数( 更新执行的函数 )，也会保存在链表中，是一个环状链表，环状链表是特殊的单链表
 
 let workInProgressHook = null; // 当前正在计算的hook，相当于一个指针，时刻修改指向
 let isMount = true; // 标志位，boolean，表示是否是 ( mount ) 阶段，对应的有 ( mount update ) 两个阶段
 
+// fiber节点
 const fiber = {
-  // fiber节点
   stateNode: App, // fiber.stateNode指向真实的DOM，即指向fiberRoot
-  memorizedState: null, // hooks链表，用来保存function函数组件中的state数据，比如setState返回数组的第一个成员的值
+  memoizedState: null, // hooks链表，memoizedState保存的是kook对象，用来保存function函数组件中的state数据，比如setState返回数组的第一个成员的值，本例中是count的值
 };
 
+// schedule
+// 调度
 function schedule() {
-  // 调度
-  workInProgressHook = fiber.memorizedState;
+  workInProgressHook = fiber.memoizedState;
+  // workInProgressHook
+  // 1. 调度方法中的更新方法执行前，将workInProgressHook重置为fiber中的第一个hook，这样才能保证mount周期后，update周期遍历链表是从头往后遍历的
+  // 2. 为什么是第一个hook，因为 fiber.memoizedState 是一整条链表，本身就是链表的第一个节点，叫做头节点
+
   const app = fiber.stateNode(); // 触发组件更新，即执行functionComponent
   isMount = false; // 第一次调度后，不再是mount节点，以后将是render阶段
   return app;
 }
 
+// dispatchAction
+// 1. dispatchAction 就是 useState 的 setter 函数
 const dispatchAction = (queue, action) => {
   const update = {
     action,
     next: null,
   };
+
   if (queue.pending === null) {
-    update.next = update;
+    update.next = update; // 初始化时，环状链表只有一个节点，所以 u0 -> u0
+    // 1. 第一次
+    // 1. 环状链表是 u0 -> u0
+    // 1. 对应代码是 update.next = update
+    // 2. 接下来代码 queue.pending = update;
   } else {
     update.next = queue.pending.next;
     queue.pending.next = update;
+    // 1. 非第一次
+    // 1. 非第一次链表已经存在，因为第一次初始化得到的链表是u0，现在插入节点u1
+    // 2. 环状链表是 u1 -> u0 -> u1
+    // 2. u1->u0 对应的代码是 ( u1的update.next = u0的update.next还是u0，因为第一次u0->u0 ) 而 ( queue.pending = 上一次的update ) 所以 ( update.next = queue.pending.next )
+    // 2. u0->u1 对应的代码是 ( u0的update.next = u1的update ) 即 ( queue.pending.next = update)
+    // 3. 接下来代码的代码是 queue.pending = update; 即将 queue.pending指针指向最新的update，这里是u1，在下一次开始时成为旧的update
   }
+
   queue.pending = update;
+  // queue.pending
+  // 1. 初始化时，queue.pending = update，即 queue.pending = update.next = update -> u0
+  // 2. 本次dispatchAction调用update是最新的update，在下一次新的dispatchAction调用时，update将成为旧的update
 
   schedule(); // dispatch执行后，执行调度函数schedule，更新组件
 };
+
+
 
 function useState(initialState) {
   let hook;
 
   if (isMount) {
-    // ----------------------------------- mount
+    // ----------------------------------------- mount
     hook = {
-      memorizedState: initialState, // 保存初始值
+      memoizedState: initialState, // 保存初始值，即 useState 的参数
       queue: {
-        pending: null,
+        pending: null, // 环形链表，用来保存update组成的链表数据，update对象上有action属性，该属性就是 const [count, setCount] = useState(0) 的 setCount 函数
       },
       next: null,
     };
@@ -63,31 +87,41 @@ function useState(initialState) {
       // mount阶段时，即初始化时 fiber.memoizedState = null
       fiber.memoizedState = hook; // 将 fiber.memoizedState 指向最新的 hook
     } else {
-      //  fiber.memoizedState存在，说明在mount阶段中有多个hooks
-      workInProgressHook.next = hook; // 将上一个hook的next指向当前的hook，即 prevHook.next -> hook
-      // 1. mount阶段，第一个hook，第一次未进入时: workInProgressHook = fiber.memorizedState = hook
+      //  fiber.memoizedState存在，说明在mount阶段中有多个 useState
+      workInProgressHook.next = hook; // 将上一个hook的next指向当前的hook，即 prevHook.next -> hook，所以单链表中新节点是在旧节点之后
+      // 1. mount阶段，第一个hook，第一次未进入时: workInProgressHook = fiber.memoizedState = hook
       // 2. mount阶段，第二个hook，会进入else:  workInProgressHook.next === fiber.memoizedState.next
     }
-    workInProgressHook = hook; // 从新将 workInProgressHook 指向最新的 hook
+    workInProgressHook = hook; // 移动workInProgressHook的指针，从新将 workInProgressHook 指向最新的 hook，即 workInProgressHook 始终指向最新的 hook
   } else {
     // ----------------------------------------- update
-    hook = workInProgressHook;
-    workInProgressHook = workInProgressHook.next;
+    // 1. 更新时，hook对象已经存在，而 workInProgressHook 上保存的就是最新的hook对象
+    hook = workInProgressHook; // 找到对应的hook
+    workInProgressHook = workInProgressHook.next; // 每调用一次，就往后移动一个节点，即不断往后遍历，用于下一次遍历时就行赋值给hook ( 即hook = workInProgressHook )
   }
 
-  let baseState = hook.memoizedState;
+  let baseState = hook.memoizedState; // 当前，正在计算的hook的state数据，注意，此时还没有进行 dispatchAction
   if (hook.queue.pending) {
-    let firstUpdate = hook.queue.pending.next;
+    let firstUpdate = hook.queue.pending.next; // 找到环形链表中的第一个update对象节点
 
     do {
       const action = firstUpdate.action;
-      baseState = action(baseState);
-      firstUpdate = firstUpdate.next;
-    } while (firstUpdate !== hook.queue.pending)
+      baseState = action(baseState); // 执行update对象上的action方法
+      // action
+      // 1. setCount((count) => count + 1) 对应 dispatchAction.bind(null, hook.queue) === dispatchAction = (queue, action) { ...}
+      //    - dispatchAction.bind(null, hook.queue) 返回的新的函数就是 setCount，并且dispatchAction的第一个参数被固定成了hook.queue，setCount只需要传入第二个参数即可
+      //    - dispatchAction(queue, action)
+      //    - dispatchAction(hook.queue, (count) => count + 1) 所以 update.action 就是 (count) => count + 1
 
-      hook.queue.pending = null;
+      // 2. baseState = action(baseState)
+      //    - 就的state传入函数，返回值在赋值给 baseState，成为最新的state的值
+
+      firstUpdate = firstUpdate.next;
+    } while (firstUpdate !== hook.queue.pending); // 最后一个update执行完后跳出循环
+
+    hook.queue.pending = null;
   }
-  hook.memoizedState = baseState;
+  hook.memoizedState = baseState; // ( 最新的state ) 赋值给 ( hook.memoizedState )
 
   return [baseState, dispatchAction.bind(null, hook.queue)];
 }
@@ -99,7 +133,7 @@ function App() {
   console.log(`count =>`, count);
 
   return {
-    click: setCount((count) => count + 1),
+    click: () => setCount((count) => count + 1),
   };
 }
 
