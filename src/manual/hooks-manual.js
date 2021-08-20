@@ -12,9 +12,16 @@
 // hooks中的一些概念
 // 1. 链表
 //    hook.memoizedState => 单向链表 - (hook对象，fiber对象) => hooks函数本的值身会保存在链表结构中，比如 [count, setCount] = useState(0) 中的 count
-//    hook.queue ==========> 环状链表 - (update对象) =========> 多个useState返回数组中的第二个成员setter函数( 更新执行的函数 )，也会保存在链表中，是一个环状链表，环状链表是特殊的单链表
+//    hook.queue =========> 环状链表 - (update对象) =========> 多个useState返回数组中的第二个成员setter函数( 更新执行的函数 )，也会保存在链表中，是一个环状链表，环状链表是特殊的单链表
 
-let workInProgressHook = null; // 当前正在计算的hook，相当于一个指针，时刻修改指向
+let workInProgressHook = null;
+// workInProgressHook
+// 1. 第一种情况: workInProgressHook 指向当前正在计算的hook，相当于一个指针，时刻修改指向
+// 2. 第二种情况: 执行到 schedule() 时，workInProgressHook 指向保存在 fiber.memoizedState 中的整个单向链表
+// 3. 总结：
+//    - workInProgressHook: 可能指向最新的hook对象，也有可能指向整个hook对象组成的整个单向链表
+//    - fiber.memoizedState: 始终指向整个hook对象组成的单向链表
+
 let isMount = true; // 标志位，boolean，表示是否是 ( mount ) 阶段，对应的有 ( mount update ) 两个阶段
 
 // fiber节点
@@ -58,7 +65,7 @@ const dispatchAction = (queue, action) => {
     // 2. 环状链表是 u1 -> u0 -> u1
     // 2. u1->u0 对应的代码是 ( u1的update.next = u0的update.next还是u0，因为第一次u0->u0 ) 而 ( queue.pending = 上一次的update ) 所以 ( update.next = queue.pending.next )
     // 2. u0->u1 对应的代码是 ( u0的update.next = u1的update ) 即 ( queue.pending.next = update)
-    // 3. 接下来代码的代码是 queue.pending = update; 即将 queue.pending指针指向最新的update，这里是u1，在下一次开始时成为旧的update
+    // 3. 接下来代码的代码是 queue.pending = update; 即将 queue.pending指针指向最新的update，这里是u1，在下一次开始时成为旧的update，也就是环状链表的最后一个节点
   }
 
   queue.pending = update;
@@ -95,9 +102,13 @@ function useState(initialState) {
     workInProgressHook = hook; // 移动workInProgressHook的指针，从新将 workInProgressHook 指向最新的 hook，即 workInProgressHook 始终指向最新的 hook
   } else {
     // ----------------------------------------- update
-    // 1. 更新时，hook对象已经存在，而 workInProgressHook 上保存的就是最新的hook对象
-    hook = workInProgressHook; // 找到对应的hook
-    workInProgressHook = workInProgressHook.next; // 每调用一次，就往后移动一个节点，即不断往后遍历，用于下一次遍历时就行赋值给hook ( 即hook = workInProgressHook )
+    // 1. 更新时，hook对象已经存在，而 workInProgressHook 上保存的整个hook对象组成的链表
+    // 2. 问题：为什么是整个链表?
+    //    回答：因为更新执行 setCount => 触发 schedule() => 在更新 schedule() 调度开始时，都要把指针重新指向hook节点组成的单向链表
+    // 3. 注意点：workInProgressHook 是一个指针，是会变的，可能指向当前最新的正在执行hook函数的hook对象节点，也可能指向这个那个单向链表
+
+    hook = workInProgressHook; // ---------------------1.完整的hook链表
+    workInProgressHook = workInProgressHook.next; // --2.注意这里workInProgressHook又会马指向最新的hook对象，每调用一次setCount，就往后移动一个节点从而找到当前的hook对象，从而知道现在是在处理哪个hook，即不断往后遍历，用于下一次遍历时就行赋值给hook ( 即hook = workInProgressHook )
   }
 
   let baseState = hook.memoizedState; // 当前，正在计算的hook的state数据，注意，此时还没有进行 dispatchAction
@@ -116,24 +127,31 @@ function useState(initialState) {
       // 2. baseState = action(baseState)
       //    - 就的state传入函数，返回值在赋值给 baseState，成为最新的state的值
 
-      firstUpdate = firstUpdate.next;
+      firstUpdate = firstUpdate.next; // 得到最新计算的state后，指针后移一位，继续执行下一个 setState
     } while (firstUpdate !== hook.queue.pending); // 最后一个update执行完后跳出循环
 
-    hook.queue.pending = null;
+    hook.queue.pending = null; // 遍历完所有的 setCount 之后，清空环形链表
   }
-  hook.memoizedState = baseState; // ( 最新的state ) 赋值给 ( hook.memoizedState )
+
+  hook.memoizedState = baseState; // 再保存最新的state
+  // ( 最新的state ) 赋值给 ( hook.memoizedState )
+  // baseState 可能是新计算的值，也有可能是旧值，取决于上面的是否进入上面的 hook.queue.pending 的if语句中
 
   return [baseState, dispatchAction.bind(null, hook.queue)];
 }
 
 function App() {
   const [count, setCount] = useState(0);
+  const [count2, setCount2] = useState(2);
 
   console.log(`isMount => `, isMount);
-  console.log(`count =>`, count);
+  console.log(`count，count2 =>`, count, count2);
 
   return {
-    click: () => setCount((count) => count + 1),
+    click: () => {
+      setCount((count) => count + 1)
+      setCount((count) => count + 2)
+    },
   };
 }
 
