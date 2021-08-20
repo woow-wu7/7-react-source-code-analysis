@@ -18,6 +18,11 @@
 #### (五) js实现单向链表
 - [js实现单向链表 - 源码](https://github.com/woow-wu7/7-react-source-code-analysis/blob/main/src/manual/linked-list.js)
 
+#### (六) 手写hooks-useState实现
+- [手写hooks-useState实现 - 源码仓库](https://github.com/woow-wu7/7-react-source-code-analysis/blob/main/src/manual/hooks-manual.js)
+- [手写hooks-useState实现 - 思维导图](https://github.com/woow-wu7/7-react-source-code-analysis/blob/main/src/images/hook-useState.png)
+![hook-useState.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/3a9ebeed07b642d7a43564fae4beb87f~tplv-k3u1fbpfcp-watermark.image)
+
 
 #### React.Children
 - 文件路径：package/react/src/React.js
