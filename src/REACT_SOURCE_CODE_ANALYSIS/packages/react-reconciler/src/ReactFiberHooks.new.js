@@ -594,8 +594,10 @@ export function resetHooksAfterThrow(): void {
   didScheduleRenderPhaseUpdateDuringThisPass = false;
 }
 
+// mountWorkInProgressHook
+// ----------------------------------------------------- mountWorkInProgressHook
 function mountWorkInProgressHook(): Hook {
-  const hook: Hook = {
+  const hook: Hook = { // hook 对象
     memoizedState: null,
 
     baseState: null,
@@ -605,14 +607,17 @@ function mountWorkInProgressHook(): Hook {
     next: null,
   };
 
-  if (workInProgressHook === null) {
+  if (workInProgressHook === null) { // 初始化时，不存在
     // This is the first hook in the list
+    // mount阶段，也可能有多个hook函数，还有可能有多个相同的hook函数
     currentlyRenderingFiber.memoizedState = workInProgressHook = hook;
   } else {
     // Append to the end of the list
+    // 1. 把最新的 hook 对象添加到链表尾部
+    // 2. 并把 workInProgressHook 重新赋值成最新的hook
     workInProgressHook = workInProgressHook.next = hook;
   }
-  return workInProgressHook;
+  return workInProgressHook; // 返回最新当前正在执行的hook
 }
 
 function updateWorkInProgressHook(): Hook {
@@ -1324,12 +1329,17 @@ function getCallerStackFrame(): string {
     : stackFrames.slice(2, 3).join('\n');
 }
 
+// mountRef
+// ----------------------------------------------------- mountRef
+// mount => useRef
 function mountRef<T>(initialValue: T): {|current: T|} {
   const hook = mountWorkInProgressHook();
   if (enableUseRefAccessWarning) {
     if (__DEV__) {
       // Support lazy initialization pattern shown in docs.
       // We need to store the caller stack frame so that we don't warn on subsequent renders.
+      // 支持文档中显示的惰性初始化模式
+      // 为了不影响之后的渲染，我们需要把调用栈放在store中
       let hasBeenInitialized = initialValue != null;
       let lazyInitGetterStack = null;
       let didCheckForLazyInit = false;
@@ -1339,6 +1349,8 @@ function mountRef<T>(initialValue: T): {|current: T|} {
       let didWarnAboutWrite = false;
 
       let current = initialValue;
+
+      // ref 对象
       const ref = {
         get current() {
           if (!hasBeenInitialized) {
@@ -1381,9 +1393,15 @@ function mountRef<T>(initialValue: T): {|current: T|} {
           current = value;
         },
       };
+
       Object.seal(ref);
+      // Object.seal 和 Object.freeze
+      // Object.seal ==========> 不能添加，删除，只能修改
+      // Object.freeze ========> 不能添加，删除，修改
+
       hook.memoizedState = ref;
       return ref;
+
     } else {
       const ref = {current: initialValue};
       hook.memoizedState = ref;
