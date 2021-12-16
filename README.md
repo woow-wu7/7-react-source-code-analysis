@@ -66,6 +66,11 @@
 - [badJs-report源码分析-仓库](https://github.com/woow-wu7/7-badjs-report-analysis)
 
 
+### (9) element-ui 源码分析
+- [element-ui 源码分析-仓库](https://github.com/woow-wu7/8-element-source-code-analysis)
+
+
+
 # 资料
 - react调试源码教程1 https://juejin.cn/post/6942687170800910350
 - react调试源码教程2 https://zhuanlan.zhihu.com/p/336933386
