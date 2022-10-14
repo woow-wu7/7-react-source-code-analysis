@@ -5,9 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import invariant from 'shared/invariant';
+import invariant from "shared/invariant";
 
-import ReactNoopUpdateQueue from './ReactNoopUpdateQueue';
+import ReactNoopUpdateQueue from "./ReactNoopUpdateQueue";
 
 const emptyObject = {};
 if (__DEV__) {
@@ -41,7 +41,6 @@ Component.prototype.isReactComponent = {}; // 用来区分组件的类型
 // 问题：如果区分 classComponent 和 functionComponent
 // 答案：在 Component.prototype.isReactComponent 上挂载 isReactComponent 来区分
 
-
 /**
  * Sets a subset of the state. Always use this to mutate
  * state. You should treat `this.state` as immutable.
@@ -68,7 +67,7 @@ Component.prototype.isReactComponent = {}; // 用来区分组件的类型
  * @protected
  */
 // ----------------------------------------------------------------------------------------------------------- setState
-Component.prototype.setState = function(partialState, callback) {
+Component.prototype.setState = function (partialState, callback) {
   // setState
 
   // 参数
@@ -80,18 +79,18 @@ Component.prototype.setState = function(partialState, callback) {
   //    - Called after state is updated 是state更新后调用的回调函数，可以获取更新过后的state
 
   invariant(
-    typeof partialState === 'object' ||
-      typeof partialState === 'function' ||
+    typeof partialState === "object" ||
+      typeof partialState === "function" ||
       partialState == null,
-    'setState(...): takes an object of state variables to update or a ' +
-      'function which returns an object of state variables.',
+    "setState(...): takes an object of state variables to update or a " +
+      "function which returns an object of state variables."
   );
   // invariant 是一个警告log直接忽略掉即可，不影响主逻辑
 
-  this.updater.enqueueSetState(this, partialState, callback, 'setState'); // reconciler
+  this.updater.enqueueSetState(this, partialState, callback, "setState"); // reconciler
   // this.updater = updater || ReactNoopUpdateQueue;
   // ReactNoopUpdateQueue 在 /react-source-code-analysis/packages/react/src/ReactNoopUpdateQueue.js 中
-/*
+  /*
       enqueueSetState: function(
         publicInstance,
         partialState,
@@ -101,7 +100,7 @@ Component.prototype.setState = function(partialState, callback) {
         warnNoop(publicInstance, 'setState');
       }
 */
-/*
+  /*
     function warnNoop(publicInstance, callerName) { // publicInstance=this，callerName='setState'
       if (__DEV__) {
         const constructor = publicInstance.constructor;
@@ -140,8 +139,8 @@ Component.prototype.setState = function(partialState, callback) {
  * @final
  * @protected
  */
-Component.prototype.forceUpdate = function(callback) {
-  this.updater.enqueueForceUpdate(this, callback, 'forceUpdate');
+Component.prototype.forceUpdate = function (callback) {
+  this.updater.enqueueForceUpdate(this, callback, "forceUpdate");
 };
 
 /**
@@ -152,23 +151,23 @@ Component.prototype.forceUpdate = function(callback) {
 if (__DEV__) {
   const deprecatedAPIs = {
     isMounted: [
-      'isMounted',
-      'Instead, make sure to clean up subscriptions and pending requests in ' +
-        'componentWillUnmount to prevent memory leaks.',
+      "isMounted",
+      "Instead, make sure to clean up subscriptions and pending requests in " +
+        "componentWillUnmount to prevent memory leaks.",
     ],
     replaceState: [
-      'replaceState',
-      'Refactor your code to use setState instead (see ' +
-        'https://github.com/facebook/react/issues/3236).',
+      "replaceState",
+      "Refactor your code to use setState instead (see " +
+        "https://github.com/facebook/react/issues/3236).",
     ],
   };
-  const defineDeprecationWarning = function(methodName, info) {
+  const defineDeprecationWarning = function (methodName, info) {
     Object.defineProperty(Component.prototype, methodName, {
-      get: function() {
+      get: function () {
         console.warn(
-          '%s(...) is deprecated in plain JavaScript React classes. %s',
+          "%s(...) is deprecated in plain JavaScript React classes. %s",
           info[0],
-          info[1],
+          info[1]
         );
         return undefined;
       },
@@ -184,7 +183,6 @@ if (__DEV__) {
 // 寄生原型链继承
 function ComponentDummy() {}
 ComponentDummy.prototype = Component.prototype;
-
 
 // ----------------------------------------------------------------------------------------------------------- PureComponent
 // PureComponent1
@@ -229,12 +227,22 @@ pureComponentPrototype.constructor = PureComponent;
 // 如果不修改，prototype.constructor将指向 ComponentDummy
 
 // Avoid an extra prototype jump for these methods.
+// 合并属性 到 pureComponentPrototype
 Object.assign(pureComponentPrototype, Component.prototype);
-// 合并属性
+// Object.assign()
+// Object.assign(target, source1, source2)
+// - 作用: 将 ( source源对象 ) 中的所有 ( 可枚举属性 ) 复制到 ( target目标对象 )
+// - 参数:
+//    - 如果只有一个参数，就回直接返回参数对象
+//    - 如果该参数不是对象，则会先转成对象，然后返回
+// - 注意:
+//    - 是浅拷贝
+//    - 同名属性的替换 - 如果具有同名属性，将被后面的source对象覆盖
+//    - 数组的处理 - 会把数组视为对象 Object.assign([1, 2, 3], [4, 5]) // [4, 5, 3]
 
 pureComponentPrototype.isPureReactComponent = true;
 // 3
 // isPureReactComponent
 // isPureReactComponent 用来判断是不是纯组件 PureComponent
 
-export {Component, PureComponent};
+export { Component, PureComponent };

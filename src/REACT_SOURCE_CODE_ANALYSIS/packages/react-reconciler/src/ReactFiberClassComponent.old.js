@@ -386,6 +386,7 @@ function checkShouldComponentUpdate(
   }
 
   // PureComponent2
+  // 
   if (ctor.prototype && ctor.prototype.isPureReactComponent) {
     return (
       !shallowEqual(oldProps, newProps) || !shallowEqual(oldState, newState)

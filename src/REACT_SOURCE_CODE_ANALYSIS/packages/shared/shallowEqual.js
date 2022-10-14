@@ -7,8 +7,8 @@
  * @flow
  */
 
-import is from './objectIs';
-import hasOwnProperty from './hasOwnProperty';
+import is from "./objectIs";
+import hasOwnProperty from "./hasOwnProperty";
 
 /**
  * Performs equality by iterating through keys on an object and returning false
@@ -16,13 +16,13 @@ import hasOwnProperty from './hasOwnProperty';
  * Returns true when the values of all keys are strictly equal.
  */
 // ----------------------------------------------------------------------------------------------------------- shallowEqual
-//  PureComponent3 - shallowEqual
+//  PureComponent3 - shallowEqual 浅比较相等
 function shallowEqual(objA: mixed, objB: mixed): boolean {
-
   // function is(x: any, y: any) {
   //   return (
   //     (x === y && (x !== 0 || 1 / x === 1 / y)) || (x !== x && y !== y) // eslint-disable-line no-self-compare
   //   );
+  //   全等判断
   // }
 
   if (is(objA, objB)) {
@@ -31,9 +31,9 @@ function shallowEqual(objA: mixed, objB: mixed): boolean {
   }
 
   if (
-    typeof objA !== 'object' ||
+    typeof objA !== "object" ||
     objA === null ||
-    typeof objB !== 'object' ||
+    typeof objB !== "object" ||
     objB === null
   ) {
     return false;
